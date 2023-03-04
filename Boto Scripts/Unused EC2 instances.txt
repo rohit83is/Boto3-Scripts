@@ -1,0 +1,28 @@
+import boto3
+import datetime
+
+# Initialize the EC2 client
+ec2 = boto3.client('ec2')
+
+# Get a list of all instances
+response = ec2.describe_instances()
+instances = response['Reservations']
+
+# Determine the threshold for last usage (in days)
+days_threshold = 30
+date_threshold = datetime.datetime.now() - datetime.timedelta(days=days_threshold)
+
+# Initialize a list to hold unused instances
+unused_instances = []
+
+# Iterate through all instances
+for instance in instances:
+    # Extract the launch time of the instance
+    launch_time = instance['Instances'][0]['LaunchTime']
+
+    # If the launch time is before the threshold and the instance is in a stopped state, add it to the list of unused instances
+    if launch_time < date_threshold and instance['Instances'][0]['State']['Name'] == 'stopped':
+        unused_instances.append(instance['Instances'][0]['InstanceId'])
+
+# Print the list of unused instances
+print('Unused instances: ', unused_instances)
