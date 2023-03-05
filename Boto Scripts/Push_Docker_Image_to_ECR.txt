@@ -1,0 +1,21 @@
+import boto3
+import os
+
+# Initialize the ECR client
+ecr = boto3.client('ecr')
+
+# Create a new repository in ECR
+repository_name = 'my-docker-repo'
+response = ecr.create_repository(repositoryName=repository_name)
+
+# Retrieve the repository URI
+repository_uri = response['repository']['repositoryUri']
+
+# Build the Docker image
+os.system('docker build -t my-image .')
+
+# Tag the image with the repository URI
+os.system(f'docker tag my-image {repository_uri}:latest')
+
+# Push the image to the repository
+os.system(f'docker push {repository_uri}:latest')
